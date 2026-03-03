@@ -1,74 +1,116 @@
-import React, { useState, useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
-import { Activity, UserPlus, ShieldCheck, LayoutDashboard } from 'lucide-react'
-import clsx from 'clsx'
+import React, { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Activity, UserPlus, ShieldCheck, LayoutDashboard, User } from "lucide-react";
+import clsx from "clsx";
+import { useAuth } from "../contexts/AuthContext";
 
-const links = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { to: '/enroll', label: 'Cadastro', icon: UserPlus },
-  { to: '/verify', label: 'Verificar', icon: ShieldCheck },
-  { to: '/identify', label: 'Identificar', icon: Activity },
-]
+const protectedLinks = [
+  { to: "/", label: "Home", icon: LayoutDashboard, exact: true },
+  { to: "/enroll", label: "Cadastro", icon: UserPlus },
+  { to: "/verify", label: "Verificar (1:1)", icon: ShieldCheck },
+  { to: "/identify", label: "Identificar (1:N)", icon: Activity },
+];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const location = useLocation()
+  const { isAuthenticated, me } = useAuth();
+  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Esconde navbar nas rotas públicas
+  const isPublic = location.pathname === "/login" || location.pathname === "/register";
+  if (isPublic) return null;
 
   return (
     <header
       className={clsx(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled ? 'glass border-b border-border shadow-card' : 'bg-transparent'
+        "fixed inset-x-0 top-0 z-50 border-b backdrop-blur",
+        scrolled ? "bg-black/40 border-white/10" : "bg-transparent border-transparent"
       )}
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-3 group">
-          <div className="relative w-8 h-8">
-            <div className="absolute inset-0 rounded-lg bg-accent-glow border border-accent/30 group-hover:border-accent/60 transition-all" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-accent text-xs font-mono font-bold">F</span>
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-2xl bg-white/10 grid place-items-center font-bold">
+            Z
+          </div>
+          <div className="leading-tight">
+            <div className="text-sm font-extrabold">ZionFace</div>
+            <div className="text-[11px] opacity-70">
+              {isAuthenticated ? (me?.pessoa?.nome || me?.usuario?.email || "Sessão ativa") : "Sessão"}
             </div>
           </div>
-          <span className="font-display font-bold text-lg tracking-tight">
-            Face<span className="text-accent">ID</span>
-          </span>
-        </NavLink>
+        </div>
 
-        {/* Nav */}
-        <nav className="flex items-center gap-1">
-          {links.map(({ to, label, icon: Icon, exact }) => (
+        <nav className="hidden items-center gap-2 md:flex">
+          {protectedLinks.map((l) => (
             <NavLink
-              key={to}
-              to={to}
-              end={exact}
+              key={l.to}
+              to={l.to}
+              end={!!l.exact}
               className={({ isActive }) =>
                 clsx(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-body font-medium transition-all duration-200',
-                  isActive
-                    ? 'bg-accent-glow text-accent border border-accent/20'
-                    : 'text-subtle hover:text-text hover:bg-border/50'
+                  "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
+                  isActive ? "bg-white/10" : "bg-white/5 hover:bg-white/10"
                 )
               }
             >
-              <Icon className="w-4 h-4" />
-              <span className="hidden sm:block">{label}</span>
+              <l.icon className="h-4 w-4 opacity-90" />
+              <span>{l.label}</span>
             </NavLink>
           ))}
         </nav>
 
-        {/* Status indicator */}
-        <div className="flex items-center gap-2 text-xs font-mono text-muted">
-          <Activity className="w-3.5 h-3.5" />
-          <span className="hidden sm:block">API</span>
+        <div className="flex items-center gap-2">
+          {!isAuthenticated && (
+            <>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  clsx(
+                    "rounded-xl px-3 py-2 text-sm font-semibold transition",
+                    isActive ? "bg-white/10" : "bg-white/5 hover:bg-white/10"
+                  )
+                }
+              >
+                Login
+              </NavLink>
+              <NavLink
+                to="/register"
+                className="rounded-xl bg-emerald-500/90 px-3 py-2 text-sm font-semibold text-black hover:bg-emerald-500/95"
+              >
+                Cadastrar
+              </NavLink>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 pb-3 md:hidden">
+        <div className="flex flex-wrap gap-2">
+          {protectedLinks.map((l) => (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={!!l.exact}
+              className={({ isActive }) =>
+                clsx(
+                  "inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition",
+                  isActive ? "bg-white/10" : "bg-white/5 hover:bg-white/10"
+                )
+              }
+            >
+              <l.icon className="h-4 w-4 opacity-90" />
+              <span>{l.label}</span>
+            </NavLink>
+          ))}
         </div>
       </div>
     </header>
-  )
+  );
 }
