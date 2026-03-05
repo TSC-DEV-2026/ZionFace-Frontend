@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authRegister } from "../services/api";
+import { authRegister } from "../../services/api";
 
 function onlyDigits(v) {
   return (v || "").replace(/\D/g, "");

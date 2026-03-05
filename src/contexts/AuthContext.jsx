@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { authMe } from "../services/api";
+import { authMe, authLogout } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -17,6 +17,16 @@ export function AuthProvider({ children }) {
       return null;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const signout = async () => {
+    try {
+      await authLogout();
+    } catch {
+      // mesmo se falhar, limpa local
+    } finally {
+      setMe(null);
     }
   };
 
@@ -38,8 +48,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: !!me,
       pessoaId,
       refresh,
-      // "logout" real depende de rota no backend; aqui é só limpar cache local
-      localSignOut: () => setMe(null),
+      signout,
     };
   }, [me, loading]);
 

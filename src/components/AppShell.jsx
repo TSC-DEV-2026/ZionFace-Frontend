@@ -4,9 +4,11 @@ import Navbar from "./Navbar";
 
 export default function AppShell() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full overflow-x-hidden bg-void text-white">
       <Navbar />
-      <main className="pt-20">
+
+      {/* pt precisa acompanhar a altura real do header em mobile */}
+      <main className="w-full overflow-x-hidden pt-[52px] sm:pt-10">
         <Outlet />
       </main>
     </div>

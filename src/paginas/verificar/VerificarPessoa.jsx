@@ -1,56 +1,55 @@
-import React, { useState } from 'react'
-import { ShieldCheck, Camera, Upload, RefreshCw, Info } from 'lucide-react'
-import clsx from 'clsx'
-import ImageDropzone from '../components/ImageDropzone'
-import CameraCapture from '../components/CameraCapture'
-import VerifyResultCard from '../components/VerifyResultCard'
-import LoadingSpinner from '../components/LoadingSpinner'
-import { verifyFace } from '../services/api'
+import React, { useState } from "react";
+import { ShieldCheck, Camera, Upload, RefreshCw, Info } from "lucide-react";
+import clsx from "clsx";
+import ImageDropzone from "../../components/ImageDropzone";
+import CameraCapture from "../../components/CameraCapture";
+import VerifyResultCard from "../../components/VerifyResultCard";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import { verifyFace } from "../../services/api";
 
 export default function VerifyPage() {
-  const [userId, setUserId] = useState('')
-  const [inputMode, setInputMode] = useState('upload')
-  const [file, setFile] = useState(null)
-  const [capturedBlob, setCapturedBlob] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [result, setResult] = useState(null)
+  const [userId, setUserId] = useState("");
+  const [inputMode, setInputMode] = useState("upload");
+  const [file, setFile] = useState(null);
+  const [capturedBlob, setCapturedBlob] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
 
-  const imageSource = inputMode === 'camera' ? capturedBlob : file
-  const canSubmit = userId.trim() && imageSource && !loading
+  const imageSource = inputMode === "camera" ? capturedBlob : file;
+  const canSubmit = userId.trim() && imageSource && !loading;
 
   const handleSubmit = async () => {
-    if (!canSubmit) return
-    setLoading(true)
-    setError(null)
-    setResult(null)
+    if (!canSubmit) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
     try {
-      const data = await verifyFace(userId.trim(), imageSource)
-      setResult(data)
+      const data = await verifyFace(userId.trim(), imageSource);
+      setResult(data);
     } catch (err) {
-      const msg = err?.response?.data?.detail || err.message || 'Erro ao verificar'
-      const status = err?.response?.status
+      const msg = err?.response?.data?.detail || err.message || "Erro ao verificar";
+      const status = err?.response?.status;
       if (status === 404) {
-        setError(`Usuário "${userId}" não encontrado. Faça o cadastro primeiro.`)
+        setError(`Usuário "${userId}" não encontrado. Faça o cadastro primeiro.`);
       } else {
-        setError(msg)
+        setError(msg);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const reset = () => {
-    setResult(null)
-    setError(null)
-    setFile(null)
-    setCapturedBlob(null)
-  }
+    setResult(null);
+    setError(null);
+    setFile(null);
+    setCapturedBlob(null);
+  };
 
   return (
-    <div className="min-h-screen grid-bg pt-24 pb-16 px-6">
+    <div className="min-h-screen grid-bg pb-12 sm:pb-16 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-9 h-9 rounded-xl bg-accent-glow border border-accent/20 flex items-center justify-center">
@@ -64,42 +63,45 @@ export default function VerifyPage() {
         </div>
 
         <div className="space-y-5">
-          {/* User ID */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-text">
-              User ID
-              <span className="text-accent ml-1">*</span>
+              User ID <span className="text-accent ml-1">*</span>
             </label>
             <input
               type="text"
               value={userId}
-              onChange={e => { setUserId(e.target.value); reset() }}
+              onChange={(e) => {
+                setUserId(e.target.value);
+                reset();
+              }}
               placeholder="ex: user_123, joao.silva, etc"
               className={clsx(
-                'w-full bg-surface border rounded-xl px-4 py-3 text-sm font-mono outline-none transition-all',
-                'placeholder:text-muted text-text',
+                "w-full bg-surface border rounded-xl px-4 py-3 text-sm font-mono outline-none transition-all",
+                "placeholder:text-muted text-text",
                 userId
-                  ? 'border-accent/30 focus:border-accent shadow-glow-sm'
-                  : 'border-border focus:border-accent/50'
+                  ? "border-accent/30 focus:border-accent shadow-glow-sm"
+                  : "border-border focus:border-accent/50"
               )}
             />
           </div>
 
-          {/* Image input */}
           <div className="space-y-3">
             <div className="flex gap-1 p-1 bg-panel rounded-xl border border-border">
               {[
-                { id: 'upload', label: 'Upload', icon: Upload },
-                { id: 'camera', label: 'Câmera', icon: Camera },
+                { id: "upload", label: "Upload", icon: Upload },
+                { id: "camera", label: "Câmera", icon: Camera },
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
-                  onClick={() => { setInputMode(id); reset() }}
+                  onClick={() => {
+                    setInputMode(id);
+                    reset();
+                  }}
                   className={clsx(
-                    'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all',
+                    "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all",
                     inputMode === id
-                      ? 'bg-surface border border-border text-text shadow-sm'
-                      : 'text-muted hover:text-subtle'
+                      ? "bg-surface border border-border text-text shadow-sm"
+                      : "text-muted hover:text-subtle"
                   )}
                 >
                   <Icon className="w-4 h-4" />
@@ -108,37 +110,43 @@ export default function VerifyPage() {
               ))}
             </div>
 
-            {inputMode === 'upload' ? (
+            {inputMode === "upload" ? (
               <ImageDropzone
-                onFile={(f) => { setFile(f); resetResult() }}
+                onFile={(f) => {
+                  setFile(f);
+                  setResult(null);
+                  setError(null);
+                  setCapturedBlob(null);
+                }}
                 label="Arraste a selfie para verificar"
               />
             ) : (
               <CameraCapture
                 onCapture={setCapturedBlob}
                 captured={capturedBlob}
-                onRetake={() => { setCapturedBlob(null); reset() }}
+                onRetake={() => {
+                  setCapturedBlob(null);
+                  reset();
+                }}
               />
             )}
           </div>
 
-          {/* Tip */}
           <div className="flex gap-2 text-xs text-muted rounded-lg bg-panel border border-border p-3">
             <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-accent/60" />
-            <span>A verificação usa detecção rápida (OpenCV) com fallback para RetinaFace em casos ambíguos — balanceando velocidade e precisão.</span>
+            <span>
+              A verificação usa detecção rápida (OpenCV) com fallback para RetinaFace em casos ambíguos — balanceando velocidade e precisão.
+            </span>
           </div>
 
-          {/* Error */}
           {error && (
             <div className="rounded-xl border border-danger/30 bg-danger-glow p-4 text-sm text-danger animate-slide-up">
               {error}
             </div>
           )}
 
-          {/* Loading */}
           {loading && <LoadingSpinner message="Verificando identidade..." />}
 
-          {/* Result */}
           {result && !loading && (
             <div className="space-y-4">
               <VerifyResultCard result={result} />
@@ -152,16 +160,15 @@ export default function VerifyPage() {
             </div>
           )}
 
-          {/* Submit */}
           {!loading && !result && (
             <button
               onClick={handleSubmit}
               disabled={!canSubmit}
               className={clsx(
-                'w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-display font-semibold text-sm transition-all',
+                "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-display font-semibold text-sm transition-all",
                 canSubmit
-                  ? 'bg-accent text-void hover:bg-accent-dim shadow-glow'
-                  : 'bg-border text-muted cursor-not-allowed'
+                  ? "bg-accent text-void hover:bg-accent-dim shadow-glow"
+                  : "bg-border text-muted cursor-not-allowed"
               )}
             >
               <ShieldCheck className="w-4 h-4" />
@@ -171,5 +178,5 @@ export default function VerifyPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
